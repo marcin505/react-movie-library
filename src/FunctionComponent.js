@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import fetchArticles, { baseURL } from './API';
 
 const FunctionComponent = () => {
@@ -8,17 +8,23 @@ const FunctionComponent = () => {
   const [url, setUrl] = useState(`${baseURL}?query=${query}`);
 
   useEffect(() => {
+    let unmounted;
     (async () => {
       const { hits: data } = await fetchArticles(url);
-      setData(data);
+      if (!unmounted) {
+        setData(data);
+      }
     })();
     inputEl.current.select();
+    return () => {
+      unmounted = true;
+    }
   }, [url]);
 
-  const handleSubmit = event => {
+  const handleSubmit = useCallback(event => {
     setUrl(`${baseURL}?query=${query}`)
     event.preventDefault();
-  }
+  }, [query]);
 
   const handleInputChange = event => setQuery(event.target.value);
 
