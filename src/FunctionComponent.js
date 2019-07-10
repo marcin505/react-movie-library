@@ -1,45 +1,33 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import fetchArticles, { baseURL } from './API';
+import React, { useState, useEffect, useCallback } from 'react';
+import { fetchArticles } from './API';
 
 const FunctionComponent = () => {
-  const inputEl = useRef(null);
   const [data, setData] = useState([]);
   const [query, setQuery] = useState('redux');
-  const [url, setUrl] = useState(`${baseURL}?query=${query}`);
+  const handleInputChange = useCallback(e => setQuery(e.target.value), []);
 
   useEffect(() => {
-    let unmounted;
-    (async () => {
-      const { hits: data } = await fetchArticles(url);
-      if (!unmounted) {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    (async() => {
+      try {
+        const { hits: data } = await fetchArticles(query, signal);
         setData(data);
-      }
+      } catch(error) {}
     })();
-    inputEl.current.select();
-    return () => {
-      unmounted = true;
-    }
-  }, [url]);
 
-  const handleSubmit = useCallback(event => {
-    setUrl(`${baseURL}?query=${query}`)
-    event.preventDefault();
+    return () => controller.abort();
   }, [query]);
-
-  const handleInputChange = event => setQuery(event.target.value);
 
   return (
     <>
       <h2>Function Component</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={query}
-          onChange={handleInputChange}
-          ref={inputEl}
-        />
-        <button type="submit">Search</button>
-      </form>
+      <input
+        type="text"
+        value={query}
+        onChange={handleInputChange}
+      />
       <ul>
         {data.map(item => (
           <li key={item.objectID}>
