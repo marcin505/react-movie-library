@@ -1,24 +1,28 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchArticles } from './API';
+import debounce from 'lodash/debounce';
 
 const FunctionComponent = () => {
   const [data, setData] = useState([]);
   const [query, setQuery] = useState('redux');
   const handleInputChange = useCallback(e => setQuery(e.target.value), []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    (async() => {
+  const getData = useCallback(
+    debounce(async ({ query, signal }) => {
       try {
         const { hits: data } = await fetchArticles(query, signal);
         setData(data);
-      } catch(error) {}
-    })();
+      } catch (error) {}
+    }, 1000),
+    [],
+  );
 
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+    getData({signal, query});
     return () => controller.abort();
-  }, [query]);
+  }, [query, getData]);
 
   return (
     <>
@@ -29,6 +33,7 @@ const FunctionComponent = () => {
         onChange={handleInputChange}
       />
       <ul>
+
         {data.map(item => (
           <li key={item.objectID}>
             <a href={item.url}>{item.title}</a>

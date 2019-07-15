@@ -7,6 +7,7 @@
     "url": "https://batman5000@bitbucket.org/batman5000/function-vs-class.git"
   },
   "dependencies": {
+    "lodash": "^4.17.14",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1"
