@@ -14,6 +14,7 @@ class ClassComponent extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.query !== this.state.query) {
+      this.cancelRequest();
       this.setData();
     }
   }
@@ -34,7 +35,6 @@ class ClassComponent extends Component {
   }, 1000);
 
   setData = async () => {
-    this.cancelRequest();
     this.controller = new AbortController();
     const { signal } = this.controller;
     this.getData({ signal, query: this.state.query });
