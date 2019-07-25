@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import { fetchArticles } from "./API";
 import debounce from "lodash/debounce";
+import Loader from './Loader';
 
 class ClassComponent extends Component {
   state = {
     data: [],
-    query: "redux"
+    query: "redux",
+    loading: false,
   };
 
   componentDidMount() {
@@ -27,17 +29,18 @@ class ClassComponent extends Component {
     if (this.controller) this.controller.abort();
   };
 
-  getData = debounce(async ({ query, signal }) => {
-    try {
-      const { hits: data } = await fetchArticles(query, signal);
-      this.setState({ data });
-    } catch (error) {}
-  }, 1000);
-
   setData = async () => {
     this.controller = new AbortController();
     const { signal } = this.controller;
-    this.getData({ signal, query: this.state.query });
+    const getData = debounce(async () => {
+      this.setState({ loading: true });
+      try {
+        const { hits: data } = await fetchArticles(this.state.query, signal);
+        this.setState({ data });
+        this.setState({ loading: false });
+      } catch (error) {}
+    }, 1000);
+    getData();
   };
 
   handleInputChange = e => this.setState({ query: e.target.value });
@@ -51,13 +54,17 @@ class ClassComponent extends Component {
           value={this.state.query}
           onChange={this.handleInputChange}
         />
-        <ul>
-          {this.state.data.map(item => (
-            <li key={item.objectID}>
-              <a href={item.url}>{item.title}</a>
-            </li>
-          ))}
-        </ul>
+        {!this.state.loading ? (
+          <ul>
+            {this.state.data.map(item => (
+              <li key={item.objectID}>
+                <a href={item.url}>{item.title}</a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Loader />
+        )}
       </>
     );
   }
