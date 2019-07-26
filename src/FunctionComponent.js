@@ -25,6 +25,8 @@ const FunctionComponent = () => {
     return () => controller.abort(); //clean up function for canceling request from current effect
   }, [query]); //pass values effect depends on
   
+  // const { data, query, handleInputChange, loading } = useCustomHook();
+
   return (
     <>
       <h2>Function Component</h2>

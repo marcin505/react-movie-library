@@ -36,5 +36,3 @@ const useCustomHook = () => {
 }
 
 export default useCustomHook;
-
-// const { data, query, handleInputChange, loading } = useCustomHook();
